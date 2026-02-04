@@ -26,6 +26,72 @@ CORS(app,
      }}
 )
 
+
+@app.route('/api/auth/set-token', methods=['POST'])
+def set_token():
+    """
+    Receive token from auth service and set cookie for this domain
+    This allows AI service to read its own cookie
+    """
+    data = request.get_json()
+    access_token = data.get('accessToken')
+    refresh_token = data.get('refreshToken')
+    
+    if not access_token:
+        return jsonify({'error': 'No token provided'}), 400
+    
+    response = jsonify({'message': 'Token set successfully'})
+    
+    # Set cookie for ai-to-db domain
+    response.set_cookie(
+        'accessToken',
+        access_token,
+        httponly=True,
+        max_age=900,  # 15 minutes
+        samesite='None',
+        secure=True,
+        path='/'
+    )
+    
+    if refresh_token:
+        response.set_cookie(
+            'refreshToken',
+            refresh_token,
+            httponly=True,
+            max_age=604800,  # 7 days
+            samesite='None',
+            secure=True,
+            path='/'
+        )
+    
+    return response, 200
+
+
+@app.route('/api/auth/logout', methods=['POST'])
+def logout():
+    """Clear cookies for this domain"""
+    response = jsonify({'message': 'Logged out successfully'})
+    
+    response.set_cookie(
+        'accessToken',
+        '',
+        max_age=0,
+        samesite='None',
+        secure=True,
+        path='/'
+    )
+    response.set_cookie(
+        'refreshToken',
+        '',
+        max_age=0,
+        samesite='None',
+        secure=True,
+        path='/'
+    )
+    
+    return response, 200
+
+
 def stream_generator(user_query):
     """
     Generator function that yields SSE-formatted events in real-time
