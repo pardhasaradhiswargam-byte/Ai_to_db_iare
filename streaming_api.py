@@ -11,11 +11,17 @@ from auth_utils import token_required  # Import JWT authentication
 
 app = Flask(__name__)
 
-# Enable CORS with credentials - MUST allow specific origin, not '*'
+# Enable CORS with credentials - Allow all services
 CORS(app, 
      resources={r"/*": {
-         "origins": ["http://localhost:5173", "http://localhost:5000"],
-         "allow_headers": ["Content-Type"],
+         "origins": [
+             "http://localhost:5173",
+             "http://localhost:5000",
+             "https://excel-to-db-iare.onrender.com",
+             "https://ai-to-db-iare.onrender.com",
+             "https://authentication-for-iare.onrender.com"
+         ],
+         "allow_headers": ["Content-Type", "Authorization"],
          "supports_credentials": True
      }}
 )
